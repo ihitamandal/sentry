@@ -10,6 +10,7 @@ from django import forms
 
 from sentry.eventstore.models import GroupEvent
 from sentry.models.project import Project
+from sentry.models.rule import Rule
 from sentry.models.rulefirehistory import RuleFireHistory
 from sentry.snuba.dataset import Dataset
 from sentry.types.condition_activity import ConditionActivity
@@ -75,7 +76,7 @@ class RuleBase(abc.ABC):
     id: ClassVar[str]
     label: ClassVar[str]
     rule_type: ClassVar[str]
-
+    
     def is_enabled(self) -> bool:
         return True
 
