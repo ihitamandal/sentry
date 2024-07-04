@@ -104,7 +104,8 @@ class BaseDeletionTask:
     def extend_relations(self, child_relations, obj):
         return child_relations
 
-    def extend_relations_bulk(self, child_relations, obj_list):
+    @staticmethod
+    def extend_relations_bulk(child_relations, obj_list):
         return child_relations
 
     def filter_relations(self, child_relations):
