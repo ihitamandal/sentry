@@ -388,9 +388,8 @@ SYMBOL_SOURCES = [
     },
 ]
 
-
 def project_with_team(extra_team: bool = False):
-    teams = [
+    teams_base = [
         {
             "id": "2349234102",
             "name": "Prime Mover",
@@ -410,12 +409,8 @@ def project_with_team(extra_team: bool = False):
         "platform": "javascript",
         "dateCreated": "2023-03-29T15:25:21.344565Z",
         "color": "#5cbf3f",
-        "team": {
-            "id": "2349234102",
-            "name": "Prime Mover",
-            "slug": "prime-mover",
-        },
-        "teams": teams if extra_team else teams[:1],
+        "team": teams_base[0],
+        "teams": teams_base if extra_team else teams_base[:1],
     }
 
 
