@@ -106,14 +106,14 @@ class BaseDeletionTask:
 
     def extend_relations_bulk(self, child_relations, obj_list):
         return child_relations
-
     def filter_relations(self, child_relations):
-        if not self.skip_models or not child_relations:
+        if not child_relations:
+            return child_relations
+            
+        if not self.skip_models:
             return child_relations
 
-        return list(
-            rel for rel in child_relations if rel.params.get("model") not in self.skip_models
-        )
+        return [rel for rel in child_relations if rel.params.get("model") not in self.skip_models]
 
     def delete_bulk(self, instance_list):
         """
