@@ -91,9 +91,15 @@ OPEN_PR_ISSUE_DESCRIPTION_LENGTH = 52
 
 MAX_RECENT_ISSUES = 5000
 
-
 def format_open_pr_comment(issue_tables: list[str]) -> str:
-    return OPEN_PR_COMMENT_BODY_TEMPLATE.format(issue_tables="\n".join(issue_tables))
+    issue_tables_str = "\n".join(issue_tables)
+    return f"""## 🔍 Existing Issues For Review
+Your pull request is modifying functions with the following pre-existing issues:
+
+{issue_tables_str}
+---
+
+<sub>Did you find this useful? React with a 👍 or 👎</sub>"""
 
 
 def format_open_pr_comment_subtitle(title_length, subtitle):
