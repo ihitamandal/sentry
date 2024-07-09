@@ -27,13 +27,14 @@ from .base import ActivationChallengeResult, AuthenticatorInterface
 
 def decode_credential_id(device):
     return urlsafe_b64encode(device["binding"].credential_data.credential_id).decode("ascii")
-
-
 def create_credential_object(registeredKey):
-    return base.AttestedCredentialData.from_ctap1(
-        websafe_decode(registeredKey["keyHandle"]),
-        websafe_decode(registeredKey["publicKey"]),
-    )
+    from fido2.ctap2 import base
+    from fido2.utils import websafe_decode
+
+    key_handle = websafe_decode(registeredKey["keyHandle"])
+    public_key = websafe_decode(registeredKey["publicKey"])
+
+    return base.AttestedCredentialData.from_ctap1(key_handle, public_key)
 
 
 def _get_url_prefix() -> str:
