@@ -253,21 +253,26 @@ class IntegerArray(GenericArray):
 
 class StringArray(GenericArray):
     """String array condition class."""
-
     @staticmethod
     def visit_match(expression: Expression, value: str) -> Condition:
-        v = f"(?i){value[1:-1]}"
-        return Condition(
-            Function(
-                "arrayExists",
-                parameters=[
-                    Lambda(["item"], Function("match", parameters=[Identifier("item"), v])),
-                    expression,
-                ],
-            ),
-            Op.EQ,
-            1,
+        # Directly create the formatted string without intermediate steps
+        pattern = f"(?i){value[1:-1]}"
+        
+        # Use a pre-initialized identifier and lambda for Function parameters
+        identifier = Identifier("item")
+        match_function = Function("match", parameters=[identifier, pattern])
+        
+        # Create the Function for arrayExists without additional intermediate operations
+        array_exists_function = Function(
+            "arrayExists",
+            parameters=[
+                Lambda(["item"], match_function),
+                expression,
+            ],
         )
+        
+        # Return the Condition directly
+        return Condition(array_exists_function, Op.EQ, 1)
 
     @staticmethod
     def visit_not_match(expression: Expression, value: str) -> Condition:
