@@ -38,12 +38,9 @@ def get_event(event_name: str) -> dict[str, Any]:
     # Create copy to avoid the risk of tests altering the event and affecting
     # other tests.
     return deepcopy(EVENTS[event_name])
-
-
-# Duration is in ms
 def modify_span_duration(obj, duration):
     obj["start_timestamp"] = 0.0
-    obj["timestamp"] = duration / 1000.0
+    obj["timestamp"] = duration * 0.001
     return obj
 
 
