@@ -7,7 +7,7 @@ def get_frames(
     sdk_frame_package: str,
     system_frame_package: str,
 ) -> Sequence[MutableMapping[str, str]]:
-    frames = [
+    return [
         {
             "function": "RtlUserThreadStart",
             "symbol": "RtlUserThreadStart",
@@ -34,7 +34,6 @@ def get_frames(
             "package": system_frame_package,
         },
     ]
-    return frames
 
 
 def get_crash_event(
