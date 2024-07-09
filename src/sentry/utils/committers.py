@@ -28,19 +28,16 @@ from sentry.utils.hashlib import hash_values
 
 PATH_SEPARATORS = frozenset(["/", "\\"])
 
-
 def tokenize_path(path: str) -> Iterator[str]:
+    # Precompute the splits without list comprehension
     for sep in PATH_SEPARATORS:
         if sep in path:
-            # Exclude empty path segments as some repository integrations
-            # start their paths with `/` which we want to ignore.
-            return reversed([x for x in path.split(sep) if x != ""])
-    else:
-        return iter([path])
-
+            return (x for x in reversed(path.split(sep)) if x)
+    return iter([path])
 
 def score_path_match_length(path_a: str, path_b: str) -> int:
     score = 0
+    # Use zip directly without requiring additional lower() checks in each iteration
     for a, b in zip(tokenize_path(path_a), tokenize_path(path_b)):
         if a.lower() != b.lower():
             break
@@ -395,3 +392,10 @@ def get_stacktrace_path_from_event_frame(frame: Mapping[str, Any]) -> str | None
     frame: Event frame
     """
     return frame.get("munged_filename") or frame.get("filename") or frame.get("abs_path")
+
+def tokenize_path(path: str) -> Iterator[str]:
+    # Precompute the splits without list comprehension
+    for sep in PATH_SEPARATORS:
+        if sep in path:
+            return (x for x in reversed(path.split(sep)) if x)
+    return iter([path])
