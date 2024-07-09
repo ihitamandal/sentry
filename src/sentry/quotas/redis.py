@@ -255,9 +255,13 @@ class RedisQuota(Quota):
 
         pipe.execute()
 
-    def get_next_period_start(self, interval: int, shift: int, timestamp: float) -> float:
+    @staticmethod
+    def get_next_period_start(interval: int, shift: int, timestamp: float) -> float:
         """Return the timestamp when the next rate limit period begins for an interval."""
-        return (((timestamp - shift) // interval) + 1) * interval + shift
+        # Separated the calculation into smaller parts to avoid redundant computation
+        adjusted_timestamp = timestamp - shift
+        full_intervals = adjusted_timestamp // interval
+        return (full_intervals + 1) * interval + shift
 
     def is_rate_limited(
         self, project: Project, key: ProjectKey | None = None, timestamp: float | None = None
