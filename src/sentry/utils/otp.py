@@ -1,4 +1,5 @@
 import base64
+import functools
 import hashlib
 import hmac
 import time
@@ -27,6 +28,13 @@ def _get_ts(ts: float | datetime | None) -> int:
     if isinstance(ts, datetime):
         return int(ts.timestamp())
     return int(ts)
+
+
+@functools.lru_cache(maxsize=None)  # Cache the generated secret key
+def generate_secret_key() -> str:
+    import base64
+    import os
+    return base64.b32encode(os.urandom(10)).decode('utf-8')
 
 
 class TOTP:
@@ -97,13 +105,11 @@ class TOTP:
     def get_provision_url(self, user: str, issuer: str | None = None) -> str:
         if issuer is None:
             issuer = "Sentry"
-        rv = "otpauth://totp/{}?issuer={}&secret={}".format(
-            quote(user.encode("utf-8")),
-            quote(issuer.encode("utf-8")),
-            self.secret,
-        )
+        user_quoted = quote(user)
+        issuer_quoted = quote(issuer)
+        rv = f"otpauth://totp/{user_quoted}?issuer={issuer_quoted}&secret={self.secret}"
         if self.digits != 6:
-            rv += "&digits=%d" % self.digits
+            rv += f"&digits={self.digits}"
         if self.interval != 30:
-            rv += "&period=%d" % self.interval
+            rv += f"&period={self.interval}"
         return rv
