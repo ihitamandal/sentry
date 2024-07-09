@@ -51,14 +51,13 @@ class ExperimentManager:
         if not org and not user:
             return None
 
-        value = self._experiments.get(experiment_name)
-        if not value:
+        experiment = self._experiments.get(experiment_name)
+        if not experiment:
             return None
 
         if org:
-            kwargs = {"org": org, "actor": actor}
-        else:
-            kwargs = {"user": user}
-
-        cls = value["experiment"]
-        return cls(**kwargs).get_variant(value["param"], log_exposure=False)
+            cls = experiment["experiment"]
+            return cls(org=org, actor=actor).get_variant(experiment["param"], log_exposure=False)
+        
+        cls = experiment["experiment"]
+        return cls(user=user).get_variant(experiment["param"], log_exposure=False)
