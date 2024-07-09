@@ -104,11 +104,9 @@ class EscalatingGroupForecast:
                 date_added,
             )
         return escalating_forecast.forecast[forecast_today_index]
-
     @classmethod
     def build_storage_identifier(cls, project_id: int, group_id: int) -> str:
-        identifier = hashlib.md5(f"{project_id}::{group_id}".encode()).hexdigest()
-        return f"e-g-f:{identifier}"
+        return f"e-g-f:{hashlib.md5(f'{project_id}::{group_id}'.encode()).hexdigest()}"
 
     def to_dict(
         self,
