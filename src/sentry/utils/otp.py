@@ -11,14 +11,10 @@ from django.utils.crypto import constant_time_compare, get_random_string
 
 def generate_secret_key(length: int = 32) -> str:
     return get_random_string(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567")
-
-
 def _pack_int(i: int) -> bytes:
-    result = bytearray()
-    while i != 0:
-        result.append(i & 0xFF)
-        i >>= 8
-    return bytes(bytearray(reversed(result)).rjust(8, b"\0"))
+    if i == 0:
+        return b'\0' * 8
+    return i.to_bytes((i.bit_length() + 7) // 8, byteorder='big').rjust(8, b'\0')
 
 
 def _get_ts(ts: float | datetime | None) -> int:
