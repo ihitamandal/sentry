@@ -13,11 +13,8 @@ def get_header_relay_signature(request):
         return str(request.META["HTTP_X_SENTRY_RELAY_SIGNATURE"])
     except (LookupError, ValueError, TypeError):
         pass
-
-
 def type_to_class_name(snake_str):
-    components = snake_str.split("_")
-    return "".join(x.title() for x in components[0:])
+    return snake_str.replace("_", " ").title().replace(" ", "")
 
 
 def to_camel_case_name(name):
