@@ -195,3 +195,12 @@ class VarAction(Action):
             frame = frames[idx]
             set_path(frame, "data", "category", value=self.value)
             match_frames[idx]["category"] = self._encoded_value
+
+    @staticmethod
+    def _parse_value(var: str, value: str):
+        try:
+            return VarAction._VALUE_PARSERS[var](value)
+        except (ValueError, TypeError) as e:
+            raise InvalidEnhancerConfig(f"Invalid value '{value}' for '{var}'") from e
+        except KeyError as e:
+            raise InvalidEnhancerConfig(f"Unknown variable '{var}'") from e
