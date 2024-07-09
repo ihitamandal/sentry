@@ -18,8 +18,6 @@ def get_header_relay_signature(request):
 def type_to_class_name(snake_str):
     components = snake_str.split("_")
     return "".join(x.title() for x in components[0:])
-
-
 def to_camel_case_name(name):
     """
     Converts a string from snake_case to camelCase
@@ -45,15 +43,20 @@ def to_camel_case_name(name):
     'oneTwoThreeFour'
     """
 
-    def first_lower(s):
-        return s[:1].lower() + s[1:]
-
-    def first_upper(s):
-        return s[:1].upper() + s[1:]
-
     if not isinstance(name, str):
         return name
-    else:
-        name = name.strip("_")
-        pieces = name.split("_")
-        return first_lower(pieces[0]) + "".join(first_upper(x) for x in pieces[1:])
+
+    name = name.strip("_")
+    if not name:
+        return ""
+
+    pieces = name.split("_")
+    if len(pieces) == 1:
+        return pieces[0][0].lower() + pieces[0][1:]
+
+    result = [pieces[0][0].lower() + pieces[0][1:]]
+    for piece in pieces[1:]:
+        if piece:
+            result.append(piece[0].upper() + piece[1:])
+
+    return "".join(result)
