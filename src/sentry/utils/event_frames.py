@@ -84,16 +84,17 @@ def flutter_frame_munger(frame: EventFrame) -> str | None:
 
 def package_relative_path(abs_path: str | None, package: str | None) -> str | None:
     """
-    returns the left-biased shortened path relative to the package directory
+    Returns the left-biased shortened path relative to the package directory.
     """
     if not abs_path or not package:
         return None
 
     package = package.strip("/")
-    paths = abs_path.strip("/").split("/")
-    for idx, path in enumerate(paths):
-        if path == package:
-            return "/".join(paths[idx:])
+    abs_path = abs_path.strip("/")
+    index = abs_path.find(package)
+
+    if index != -1:
+        return abs_path[index:]
 
     return None
 
