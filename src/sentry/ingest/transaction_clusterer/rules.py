@@ -140,28 +140,34 @@ class CompositeRuleStore:
 
     def _clean_rules(self, rules: RuleSet) -> RuleSet:
         return {rule: seen for rule, seen in rules.items() if RuleValidator(rule).is_valid()}
-
+    
     def _trim_rules(self, rules: RuleSet) -> RuleSet:
-        sorted_rules = sorted(rules.items(), key=lambda p: p[1], reverse=True)
-        last_seen_deadline = _now() - TRANSACTION_NAME_RULE_TTL_SECS
-        sorted_rules = [rule for rule in sorted_rules if rule[1] >= last_seen_deadline]
+        now = _now()
+        last_seen_deadline = now - TRANSACTION_NAME_RULE_TTL_SECS
+        filtered_rules = {
+            rule: last_seen for rule, last_seen in rules.items()
+            if last_seen >= last_seen_deadline
+        }
 
-        if self.MERGE_MAX_RULES < len(rules):
+        if self.MERGE_MAX_RULES < len(filtered_rules):
+            sorted_rules = sorted(filtered_rules.items(), key=lambda p: p[1], reverse=True)
             with sentry_sdk.configure_scope() as scope:
-                sentry_sdk.set_measurement("discarded_rules", len(rules) - self.MERGE_MAX_RULES)
+                discarded_rules = sorted_rules[self.MERGE_MAX_RULES:]
+                sentry_sdk.set_measurement("discarded_rules", len(filtered_rules) - self.MERGE_MAX_RULES)
                 scope.set_context(
                     "clustering_rules_max",
                     {
-                        "num_existing_rules": len(rules),
+                        "num_existing_rules": len(filtered_rules),
                         "max_amount": self.MERGE_MAX_RULES,
-                        "discarded_rules": sorted_rules[self.MERGE_MAX_RULES :],
+                        "discarded_rules": discarded_rules,
                     },
                 )
                 sentry_sdk.set_tag("namespace", self._namespace.value.name)
                 sentry_sdk.capture_message("Clusterer discarded rules", level="warning")
-            sorted_rules = sorted_rules[: self.MERGE_MAX_RULES]
-
-        return {rule: last_seen for rule, last_seen in sorted_rules}
+            sorted_rules = sorted_rules[:self.MERGE_MAX_RULES]
+            return {rule: last_seen for rule, last_seen in sorted_rules}
+        else:
+            return filtered_rules
 
 
 class LocalRuleStore:
@@ -241,3 +247,6 @@ def bump_last_used(namespace: ClustererNamespace, project: Project, pattern: str
     in the `cluster_projects` task.
     """
     RedisRuleStore(namespace).update_rule(project, pattern, _now())
+
+def _now() -> int:
+    return int(datetime.now(timezone.utc).timestamp())
