@@ -121,14 +121,14 @@ class InMemoryTSDB(BaseTSDB):
         self.validate_arguments([model], [environment_id])
 
         rollup, series = self.get_optimal_rollup_series(start, end, rollup)
-
+        normalized_times = [self.normalize_ts_to_rollup(ts, rollup) for ts in series]
+        
         results = {}
+        sets_model = self.sets[model]
+        
         for key in keys:
-            source = self.sets[model][(key, environment_id)]
-            counts = results[key] = []
-            for timestamp in series:
-                r = self.normalize_ts_to_rollup(timestamp, rollup)
-                counts.append((timestamp, len(source[r])))
+            source = sets_model[(key, environment_id)]
+            results[key] = [(timestamp, len(source[r])) for timestamp, r in zip(series, normalized_times)]
 
         return results
 
