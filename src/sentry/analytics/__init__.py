@@ -22,9 +22,8 @@ _SENTRY_ANALYTICS_ALIASES = {
     "pubsub": "sentry.analytics.pubsub.PubSubAnalytics",
 }
 
-
 def _get_backend_path(path: str) -> str:
-    return _SENTRY_ANALYTICS_ALIASES.get(path, path)
+    return _SENTRY_ANALYTICS_ALIASES[path] if path in _SENTRY_ANALYTICS_ALIASES else path
 
 
 backend = LazyServiceWrapper(
