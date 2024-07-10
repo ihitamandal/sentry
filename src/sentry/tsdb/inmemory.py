@@ -271,16 +271,20 @@ class InMemoryTSDB(BaseTSDB):
         self, model, keys, start, end=None, rollup=None, limit=None, environment_id=None
     ):
         rollup, series = self.get_optimal_rollup_series(start, end, rollup)
-
         self.validate_arguments([model], [environment_id])
 
+        model_data = self.frequencies[model]
         results = {}
+        
+        norm_ts = self.normalize_ts_to_rollup  # local alias for faster lookup
         for key in keys:
-            result = results[key] = []
-            source = self.frequencies[model][(key, environment_id)]
-            for timestamp in series:
-                data = source[self.normalize_ts_to_rollup(timestamp, rollup)]
-                result.append((timestamp, dict(data.most_common(limit))))
+            result = []
+            source = model_data[(key, environment_id)]
+            result.extend(
+                (timestamp, dict(source[norm_ts(timestamp, rollup)].most_common(limit)))
+                for timestamp in series
+            )
+            results[key] = result
 
         return results
 
