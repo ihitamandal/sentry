@@ -2,7 +2,9 @@ def sort_by_severity(problems):
     """\
     Sort an iterable of ``Problem``s by their severity, from most severe to least severe.
     """
-    return sorted(problems, key=lambda i: (-Problem.SEVERITY_LEVELS[i.severity], i.message))
+    return sorted(problems, key=get_severity_key)
+def get_severity_key(i):
+    return -Problem.SEVERITY_LEVELS[i.severity], i.message
 
 
 class Problem:
