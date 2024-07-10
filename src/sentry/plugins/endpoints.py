@@ -1,5 +1,9 @@
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from sentry.api.api_publish_status import ApiPublishStatus
 from sentry.api.base import region_silo_endpoint
+from sentry.api.bases.project import ProjectEndpoint
 
 __all__ = ["PluginProjectEndpoint", "PluginGroupEndpoint"]
 
@@ -22,9 +26,8 @@ class PluginProjectEndpoint(ProjectEndpoint):
 
     def get(self, request: Request, project, *args, **kwargs) -> Response:
         return self._handle(request, project, *args, **kwargs)
-
     def post(self, request: Request, project, *args, **kwargs) -> Response:
-        return self._handle(request, project, *args, **kwargs)
+        return ProjectEndpoint._handle(self, request, project, *args, **kwargs)
 
     def respond(self, *args, **kwargs):
         return Response(*args, **kwargs)
