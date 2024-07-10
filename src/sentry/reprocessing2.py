@@ -605,39 +605,61 @@ def start_group_reprocessing(
 
     return new_group.id
 
-
 def is_group_finished(group_id: int) -> bool:
     """
     Checks whether a group has finished reprocessing.
     """
-
     pending, _ = get_progress(group_id)
     return pending <= 0
 
-
 def get_progress(group_id: int, project_id: int | None = None) -> tuple[int, Any | None]:
     pending, ttl = reprocessing_store.get_pending(group_id)
-    info = reprocessing_store.get_progress(group_id)
+    
     if pending is None:
         logger.error("reprocessing2.missing_counter")
         return 0, None
+
+    info = reprocessing_store.get_progress(group_id)
+    
     if info is None:
         logger.error("reprocessing2.missing_info")
         return 0, None
 
-    # We expect reprocessing to make progress every now and then, by bumping the
-    # TTL of the "counter" key. If that TTL wasn't bumped in a while, we just
-    # assume that reprocessing is stuck, and will just call finish on it.
-    if project_id is not None and ttl is not None and ttl > 0:
-        default_ttl = settings.SENTRY_REPROCESSING_SYNC_TTL
-        age = default_ttl - ttl
+    # Check reprocessing status if project_id and ttl are provided
+    if project_id and ttl and ttl > 0:
+        age = settings.SENTRY_REPROCESSING_SYNC_TTL - ttl
         if age > REPROCESSING_TIMEOUT:
             from sentry.tasks.reprocessing2 import finish_reprocessing
-
             finish_reprocessing.delay(project_id=project_id, group_id=group_id)
 
-    # Our internal sync counters are counting over *all* events, but the
-    # progressbar in the frontend goes until max_events. Advance progressbar
-    # proportionally.
-    _pending = int(int(pending) * info["totalEvents"] / float(info.get("syncCount") or 1))
+    # Calculate pending using integer arithmetic for better performance
+    sync_count = info.get("syncCount") or 1
+    _pending = pending * info["totalEvents"] // sync_count
+    
+    return _pending, info
+
+def get_progress(group_id: int, project_id: int | None = None) -> tuple[int, Any | None]:
+    pending, ttl = reprocessing_store.get_pending(group_id)
+    
+    if pending is None:
+        logger.error("reprocessing2.missing_counter")
+        return 0, None
+
+    info = reprocessing_store.get_progress(group_id)
+    
+    if info is None:
+        logger.error("reprocessing2.missing_info")
+        return 0, None
+
+    # Check reprocessing status if project_id and ttl are provided
+    if project_id and ttl and ttl > 0:
+        age = settings.SENTRY_REPROCESSING_SYNC_TTL - ttl
+        if age > REPROCESSING_TIMEOUT:
+            from sentry.tasks.reprocessing2 import finish_reprocessing
+            finish_reprocessing.delay(project_id=project_id, group_id=group_id)
+
+    # Calculate pending using integer arithmetic for better performance
+    sync_count = info.get("syncCount") or 1
+    _pending = pending * info["totalEvents"] // sync_count
+    
     return _pending, info
