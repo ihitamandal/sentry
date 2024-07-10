@@ -118,12 +118,14 @@ class Param(Generic[T]):
         correct type.
         """
         if value is None:
-            value = self.default(target)
+            if callable(self._default):
+                value = self._default(target)
+            else:
+                value = self._default
 
-        if self._missing_value(value):
-            raise AttributeError(f"Missing required param: `{name}`")
-
-        if self.is_required and not isinstance(value, self.type):
+        if value is None or (self.is_required and not isinstance(value, self.type)):
+            if value is None:
+                raise AttributeError(f"Missing required param: `{name}`")
             raise TypeError(f"`{name}` must be a {self.type}, received {type(value)}")
 
         return True
