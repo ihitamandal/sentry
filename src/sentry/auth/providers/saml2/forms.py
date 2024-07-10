@@ -13,17 +13,29 @@ def extract_idp_data_from_parsed_data(data):
     Transform data returned by the OneLogin_Saml2_IdPMetadataParser into the
     expected IdP dict shape.
     """
-    idp = data.get("idp", {})
+    idp = data.get("idp")
+    if not idp:
+        return {
+            "entity_id": None,
+            "sso_url": None,
+            "slo_url": None,
+            "x509cert": None,
+        }
 
-    # In some scenarios the IDP sticks the x509cert in the x509certMulti
-    # parameter
-    cert = idp.get("x509cert", idp.get("x509certMulti", {}).get("signing", [None])[0])
+    single_sign_on_service = idp.get("singleSignOnService")
+    single_logout_service = idp.get("singleLogoutService")
+    x509cert = idp.get("x509cert")
 
+    if not x509cert:
+        x509cert_multi = idp.get("x509certMulti")
+        if x509cert_multi:
+            x509cert = x509cert_multi.get("signing", [None])[0]
+    
     return {
         "entity_id": idp.get("entityId"),
-        "sso_url": idp.get("singleSignOnService", {}).get("url"),
-        "slo_url": idp.get("singleLogoutService", {}).get("url"),
-        "x509cert": cert,
+        "sso_url": single_sign_on_service["url"] if single_sign_on_service else None,
+        "slo_url": single_logout_service["url"] if single_logout_service else None,
+        "x509cert": x509cert,
     }
 
 
