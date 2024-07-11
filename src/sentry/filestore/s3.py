@@ -447,7 +447,7 @@ class S3Boto3Storage(Storage):
         return smart_str(name, encoding=self.file_name_charset)
 
     def _decode_name(self, name):
-        return force_str(name, encoding=self.file_name_charset)
+        return force_str(name, encoding=getattr(self, 'file_name_charset', 'utf-8'))
 
     def _compress_content(self, content):
         """Gzip a given string content."""
