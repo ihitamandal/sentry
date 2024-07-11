@@ -68,9 +68,7 @@ def translate_transaction_status(val: str) -> str:
 
 
 def to_list(value: list[str] | str) -> list[str]:
-    if isinstance(value, list):
-        return value
-    return [value]
+    return value if isinstance(value, list) else [value]
 
 
 def convert_condition_to_function(cond):
