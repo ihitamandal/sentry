@@ -4,7 +4,7 @@ import abc
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Tuple, TypeVar
 
 from sentry.utils import warnings
 
@@ -101,8 +101,7 @@ class RoleLevel(Generic[R]):
 
     def get_all(self) -> Sequence[R]:
         return self._priority_seq
-
-    def get_choices(self) -> Sequence[tuple[str, str]]:
+    def get_choices(self) -> Sequence[Tuple[str, str]]:
         return self._choices
 
     def get_descriptions(self) -> Sequence[tuple[str, str]]:
