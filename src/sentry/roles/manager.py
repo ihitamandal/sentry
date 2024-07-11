@@ -10,7 +10,7 @@ from sentry.utils import warnings
 
 
 def _normalize_whitespace(text: str) -> str:
-    return re.sub(r"\s+", " ", text.strip())
+    return ' '.join(text.split())
 
 
 R = TypeVar("R", bound="Role")
