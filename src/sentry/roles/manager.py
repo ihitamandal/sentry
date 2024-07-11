@@ -94,7 +94,7 @@ class RoleLevel(Generic[R]):
         yield from self._priority_seq
 
     def can_manage(self, role: str, other: str) -> bool:
-        return self.get(role).priority >= self.get(other).priority
+        return self._id_map[role].priority >= self._id_map[other].priority
 
     def get(self, id: str) -> R:
         return self._id_map[id]
