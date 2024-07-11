@@ -636,3 +636,9 @@ class S3Boto3Storage(Storage):
             name = self._clean_name(name)
             return name
         return super().get_available_name(name, max_length)
+
+    def _initialize_settings(self, settings: dict):
+        """Set settings as attributes if they exist in the instance."""
+        for name, value in settings.items():
+            if hasattr(self, name):
+                setattr(self, name, value)
