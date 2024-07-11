@@ -495,14 +495,10 @@ def _semver_build_filter_converter(
         versions = [SEMVER_EMPTY_RELEASE]
 
     return ["release", "IN", versions]
-
-
 def handle_operator_negation(operator: str) -> tuple[str, bool]:
-    negated = False
     if operator == "!=":
-        negated = True
-        operator = "="
-    return operator, negated
+        return "=", True
+    return operator, False
 
 
 def parse_semver(version, operator) -> SemverFilter:
