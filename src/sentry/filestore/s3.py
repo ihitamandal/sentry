@@ -416,7 +416,7 @@ class S3Boto3Storage(Storage):
                         "``True``." % name
                     )
         return bucket
-
+    
     def _clean_name(self, name):
         """
         Cleans the name so that Windows style paths work
@@ -424,13 +424,10 @@ class S3Boto3Storage(Storage):
         # Normalize Windows style paths
         clean_name = posixpath.normpath(name).replace("\\", "/")
 
-        # os.path.normpath() can strip trailing slashes so we implement
-        # a workaround here.
+        # Handle potential stripping of trailing slashes
         if name.endswith("/") and not clean_name.endswith("/"):
-            # Add a trailing slash as it was stripped.
             return clean_name + "/"
-        else:
-            return clean_name
+        return clean_name
 
     def _normalize_name(self, name):
         """
