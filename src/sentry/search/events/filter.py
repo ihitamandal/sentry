@@ -311,7 +311,9 @@ def _team_key_transaction_filter_converter(
 
 
 def _flip_field_sort(field: str):
-    return field[1:] if field.startswith("-") else f"-{field}"
+    if field and field[0] == "-":
+        return field[1:]
+    return "-" + field
 
 
 def _release_stage_filter_converter(
