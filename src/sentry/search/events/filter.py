@@ -52,6 +52,7 @@ from sentry.search.utils import parse_release
 from sentry.utils.snuba import FUNCTION_TO_OPERATOR, OPERATOR_TO_FUNCTION, SNUBA_AND, SNUBA_OR
 from sentry.utils.strings import oxfordize_list
 from sentry.utils.validators import INVALID_ID_DETAILS, INVALID_SPAN_ID, WILDCARD_NOT_ALLOWED
+from collections import deque
 
 
 def is_condition(term):
@@ -705,10 +706,10 @@ def flatten_condition_tree(tree, condition_function):
     Take a binary tree of conditions, and flatten all of the terms using the condition function.
     E.g. f( and(and(b, c), and(d, e)), and ) -> [b, c, d, e]
     """
-    stack = [tree]
+    stack = deque([tree])
     flattened = []
-    while len(stack) > 0:
-        item = stack.pop(0)
+    while stack:
+        item = stack.popleft()
         if item[0] == condition_function:
             stack.extend(item[1])
         else:
