@@ -584,31 +584,15 @@ class S3Boto3Storage(Storage):
         return localtime(self.get_modified_time(name)).replace(tzinfo=None)
 
     def _strip_signing_parameters(self, url):
-        # Boto3 does not currently support generating URLs that are unsigned. Instead we
-        # take the signed URLs and strip any querystring params related to signing and expiration.
-        # Note that this may end up with URLs that are still invalid, especially if params are
-        # passed in that only work with signed URLs, e.g. response header params.
-        # The code attempts to strip all query parameters that match names of known parameters
-        # from v2 and v4 signatures, regardless of the actual signature version used.
         split_url = urlparse.urlsplit(url)
         qs = urlparse.parse_qsl(split_url.query, keep_blank_values=True)
         blacklist = {
-            "x-amz-algorithm",
-            "x-amz-credential",
-            "x-amz-date",
-            "x-amz-expires",
-            "x-amz-signedheaders",
-            "x-amz-signature",
-            "x-amz-security-token",
-            "awsaccesskeyid",
-            "expires",
-            "signature",
+            "x-amz-algorithm", "x-amz-credential", "x-amz-date", "x-amz-expires",
+            "x-amz-signedheaders", "x-amz-signature", "x-amz-security-token",
+            "awsaccesskeyid", "expires", "signature",
         }
-        filtered_qs = ((key, val) for key, val in qs if key.lower() not in blacklist)
-        # Note: Parameters that did not have a value in the original query string will have
-        # an '=' sign appended to it, e.g ?foo&bar becomes ?foo=&bar=
-        joined_qs = ("=".join(keyval) for keyval in filtered_qs)
-        split_url = split_url._replace(query="&".join(joined_qs))
+        whitelist_qs = (f"{key}={val}" for key, val in qs if key.lower() not in blacklist)
+        split_url = split_url._replace(query="&".join(whitelist_qs))
         return split_url.geturl()
 
     def url(self, name, parameters=None, expire=None):
