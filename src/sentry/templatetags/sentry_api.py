@@ -10,18 +10,11 @@ from sentry.utils import json
 
 register = template.Library()
 
-
-@register.simple_tag(takes_context=True)
 def serialize(context, obj):
-    if "request" in context:
-        user = context["request"].user
-    else:
-        user = None
-
+    user = context.get("request").user if "request" in context else None
     return convert_to_json(serialize_func(obj, user))
 
 
-@register.simple_tag
 def convert_to_json(obj):
     return json.dumps_htmlsafe(obj)
 
@@ -54,3 +47,7 @@ def get_recipient_context(request, escape=False):
     else:
         result = {}
     return convert_to_json(result)
+
+
+def convert_to_json(obj):
+    return json.dumps_htmlsafe(obj)
